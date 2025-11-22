@@ -8,4 +8,3 @@ indent-style = "space"
 [lint]
 select = ["E", "F", "I", "B", "UP"]
 ignore = ["E501"]
-fix = true
