@@ -62,11 +62,13 @@ class FileStorage:
 
     def get_raw_file_path(self, document_id: str) -> Path | None:
         """Return the stored raw file path if it exists."""
+        document_id = self._validate_document_id(document_id)
         matches = list(self.paths.raw.glob(f"{document_id}.*"))
         return matches[0] if matches else None
 
     def load_ocr_text(self, document_id: str) -> str:
         """Load OCR output text or raise if it doesn't exist."""
+        document_id = self._validate_document_id(document_id)
         ocr_path = self.paths.ocr / f"{document_id}.txt"
         if not ocr_path.exists():
             raise HTTPException(
@@ -77,18 +79,21 @@ class FileStorage:
 
     def save_ocr_text(self, document_id: str, text: str) -> Path:
         """Persist OCR output for future reuse."""
+        document_id = self._validate_document_id(document_id)
         ocr_path = self.paths.ocr / f"{document_id}.txt"
         ocr_path.write_text(text, encoding="utf-8")
         return ocr_path
 
     def save_sentences(self, document_id: str, data: Mapping[str, Any]) -> Path:
         """Store processed sentence data for later inspection."""
+        document_id = self._validate_document_id(document_id)
         path = self.paths.sentences / f"{document_id}.json"
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
         return path
 
     def load_sentences(self, document_id: str) -> dict[str, Any]:
         """Load stored sentence data if available."""
+        document_id = self._validate_document_id(document_id)
         path = self.paths.sentences / f"{document_id}.json"
         if not path.exists():
             raise HTTPException(
@@ -96,6 +101,14 @@ class FileStorage:
                 detail="No sentence data found. Run /documents/{id}/sentences first.",
             )
         return json.loads(path.read_text(encoding="utf-8"))
+
+    def _validate_document_id(self, document_id: str) -> str:
+        """Ensure the supplied document ID is a canonical UUID string."""
+        try:
+            validated = uuid.UUID(str(document_id))
+        except (ValueError, AttributeError, TypeError) as exc:
+            raise HTTPException(status_code=400, detail="Invalid document_id format.") from exc
+        return str(validated)
 
     def _resolve_extension(self, file: UploadFile, content_type: str) -> str:
         """Determine the file extension for an upload based on its metadata."""
