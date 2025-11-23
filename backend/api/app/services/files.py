@@ -1,10 +1,13 @@
-"""File storage helpers for uploads (local “mini-S3”)."""
+"""File storage helpers for uploads, OCR output, and processed text."""
 
 from __future__ import annotations
 
+import json
 import uuid
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from fastapi import HTTPException, UploadFile
 
@@ -15,19 +18,21 @@ DEFAULT_IMAGE_EXTENSION = ".jpg"
 
 @dataclass(slots=True)
 class StoragePaths:
-    """Resolved directories for raw uploads."""
+    """Resolved directories for raw uploads, OCR output, and processed text."""
 
     base_dir: Path
     raw: Path = field(init=False)
     ocr: Path = field(init=False)
+    sentences: Path = field(init=False)
 
     def __post_init__(self) -> None:
         self.raw = self.base_dir / "raw"
         self.ocr = self.base_dir / "ocr"
+        self.sentences = self.base_dir / "sentences"
 
     def ensure_exists(self) -> None:
         """Create required directories if they don't exist."""
-        for path in (self.raw, self.ocr):
+        for path in (self.raw, self.ocr, self.sentences):
             path.mkdir(parents=True, exist_ok=True)
 
 
@@ -60,11 +65,37 @@ class FileStorage:
         matches = list(self.paths.raw.glob(f"{document_id}.*"))
         return matches[0] if matches else None
 
+    def load_ocr_text(self, document_id: str) -> str:
+        """Load OCR output text or raise if it doesn't exist."""
+        ocr_path = self.paths.ocr / f"{document_id}.txt"
+        if not ocr_path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail="OCR text not found. Run /documents/{id}/ocr first.",
+            )
+        return ocr_path.read_text(encoding="utf-8")
+
     def save_ocr_text(self, document_id: str, text: str) -> Path:
         """Persist OCR output for future reuse."""
         ocr_path = self.paths.ocr / f"{document_id}.txt"
         ocr_path.write_text(text, encoding="utf-8")
         return ocr_path
+
+    def save_sentences(self, document_id: str, data: Mapping[str, Any]) -> Path:
+        """Store processed sentence data for later inspection."""
+        path = self.paths.sentences / f"{document_id}.json"
+        path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        return path
+
+    def load_sentences(self, document_id: str) -> dict[str, Any]:
+        """Load stored sentence data if available."""
+        path = self.paths.sentences / f"{document_id}.json"
+        if not path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail="No sentence data found. Run /documents/{id}/sentences first.",
+            )
+        return json.loads(path.read_text(encoding="utf-8"))
 
     def _resolve_extension(self, file: UploadFile, content_type: str) -> str:
         """Determine the file extension for an upload based on its metadata."""
