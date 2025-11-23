@@ -254,3 +254,10 @@ data/sentences/*
 !data/raw/.gitkeep
 !data/ocr/.gitkeep
 !data/sentences/.gitkeep
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
