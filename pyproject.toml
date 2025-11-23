@@ -9,6 +9,14 @@ license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "python-multipart>=0.0.6",
+    "easyocr>=1.7.0",
+    "pillow>=10.0.0",
+    "pypdf>=4.0.0",
+    "pdf2image>=1.16.0",
+    "kss>=3.0.0",
 ]
 
 
