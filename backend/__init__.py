@@ -1,1 +1,0 @@
-"""OCRean backend package."""
