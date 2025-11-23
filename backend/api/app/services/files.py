@@ -19,13 +19,16 @@ class StoragePaths:
 
     base_dir: Path
     raw: Path = field(init=False)
+    ocr: Path = field(init=False)
 
     def __post_init__(self) -> None:
         self.raw = self.base_dir / "raw"
+        self.ocr = self.base_dir / "ocr"
 
     def ensure_exists(self) -> None:
         """Create required directories if they don't exist."""
-        self.raw.mkdir(parents=True, exist_ok=True)
+        for path in (self.raw, self.ocr):
+            path.mkdir(parents=True, exist_ok=True)
 
 
 class FileStorage:
@@ -51,6 +54,17 @@ class FileStorage:
             raise HTTPException(status_code=500, detail="Failed to save file") from exc
 
         return document_id
+
+    def get_raw_file_path(self, document_id: str) -> Path | None:
+        """Return the stored raw file path if it exists."""
+        matches = list(self.paths.raw.glob(f"{document_id}.*"))
+        return matches[0] if matches else None
+
+    def save_ocr_text(self, document_id: str, text: str) -> Path:
+        """Persist OCR output for future reuse."""
+        ocr_path = self.paths.ocr / f"{document_id}.txt"
+        ocr_path.write_text(text, encoding="utf-8")
+        return ocr_path
 
     def _resolve_extension(self, file: UploadFile, content_type: str) -> str:
         """Determine the file extension for an upload based on its metadata."""

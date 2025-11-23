@@ -1,11 +1,12 @@
-"""Minimal FastAPI application with upload support."""
+"""Minimal FastAPI application with upload/OCR support."""
 
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 
 from .services.files import FileStorage
+from .services.ocr import OCRProcessor
 
 app = FastAPI(title="OCRean API", version="0.1.0")
 
@@ -13,6 +14,7 @@ app = FastAPI(title="OCRean API", version="0.1.0")
 BASE_DIR = Path(__file__).resolve().parents[3]
 DATA_DIR = BASE_DIR / "data"
 file_storage = FileStorage(DATA_DIR)
+ocr_processor = OCRProcessor(use_gpu=True)
 
 
 @app.get("/")
@@ -32,3 +34,15 @@ async def upload_document(file: Annotated[UploadFile, File()]):
     """Upload an image or PDF and receive a document ID."""
     document_id = await file_storage.save_uploaded_file(file)
     return {"document_id": document_id}
+
+
+@app.post("/documents/{document_id}/ocr")
+async def run_ocr(document_id: str):
+    """Run OCR against a previously uploaded document."""
+    document_path = file_storage.get_raw_file_path(document_id)
+    if not document_path:
+        raise HTTPException(status_code=404, detail="Document not found. Upload first.")
+
+    text = ocr_processor.extract_text(document_path)
+    file_storage.save_ocr_text(document_id, text)
+    return {"document_id": document_id, "text": text}
