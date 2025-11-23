@@ -3,7 +3,7 @@
 import pytest
 from fastapi import HTTPException
 
-from backend.api.app.services.files import FileStorage
+from services.files import FileStorage
 
 
 def test_load_ocr_text_rejects_invalid_document_id(tmp_path):
