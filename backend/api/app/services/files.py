@@ -37,7 +37,7 @@ class StoragePaths:
 
 
 class FileStorage:
-    """Local file storage manager for uploaded documents."""
+    """Local file storage manager for uploaded documents and derived data."""
 
     def __init__(self, base_dir: Path):
         self.paths = StoragePaths(base_dir)
@@ -102,7 +102,6 @@ class FileStorage:
         if content_type == PDF_CONTENT_TYPE:
             return ".pdf"
 
-        # For images, prefer whatever extension the client provided, fallback to JPG.
         if content_type.startswith(IMAGE_PREFIX):
             if file.filename:
                 suffix = Path(file.filename).suffix
