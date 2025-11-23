@@ -243,3 +243,14 @@ Desktop.ini
 
 # VSCode
 .vscode/
+
+# Local data directory - ignore all files but keep folder structure with .gitkeep
+# Ignore all content files in data subdirectories
+data/raw/*
+data/ocr/*
+data/sentences/*
+# But keep .gitkeep files to preserve folder structure
+!data/.gitkeep
+!data/raw/.gitkeep
+!data/ocr/.gitkeep
+!data/sentences/.gitkeep
