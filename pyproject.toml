@@ -17,6 +17,8 @@ dependencies = [
     "pypdf>=4.0.0",
     "pdf2image>=1.16.0",
     "kss>=3.0.0",
+    "boto3>=1.28.0",
+    "pydantic-settings>=2.0.0",
 ]
 
 
