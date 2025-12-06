@@ -1,4 +1,4 @@
-"""File storage helpers for uploads, OCR output, and processed text."""
+"""Local file storage helpers for uploads, OCR output, and processed text."""
 
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ class StoragePaths:
             path.mkdir(parents=True, exist_ok=True)
 
 
-class FileStorage:
+class LocalFileStorage:
     """Local file storage manager for uploaded documents and derived data."""
 
     def __init__(self, base_dir: Path):
