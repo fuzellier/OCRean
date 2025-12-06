@@ -1,4 +1,4 @@
-"""File storage helpers for uploads, OCR output, and processed text."""
+"""Local file storage helpers for uploads, OCR output, and processed text."""
 
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ class StoragePaths:
             path.mkdir(parents=True, exist_ok=True)
 
 
-class FileStorage:
+class LocalFileStorage:
     """Local file storage manager for uploaded documents and derived data."""
 
     def __init__(self, base_dir: Path):
@@ -65,6 +65,13 @@ class FileStorage:
         document_id = self._validate_document_id(document_id)
         matches = list(self.paths.raw.glob(f"{document_id}.*"))
         return matches[0] if matches else None
+
+    def get_raw_file_content(self, document_id: str) -> bytes:
+        """Get raw file content as bytes for processing."""
+        file_path = self.get_raw_file_path(document_id)
+        if not file_path:
+            raise HTTPException(status_code=404, detail="Document not found")
+        return file_path.read_bytes()
 
     def load_ocr_text(self, document_id: str) -> str:
         """Load OCR output text or raise if it doesn't exist."""

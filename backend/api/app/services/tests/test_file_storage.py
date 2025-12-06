@@ -1,13 +1,13 @@
-"""Tests for FileStorage document ID validation."""
+"""Tests for LocalFileStorage document ID validation."""
 
 import pytest
 from fastapi import HTTPException
 
-from services.files import FileStorage
+from services.files import LocalFileStorage
 
 
 def test_load_ocr_text_rejects_invalid_document_id(tmp_path):
-    storage = FileStorage(tmp_path)
+    storage = LocalFileStorage(tmp_path)
 
     with pytest.raises(HTTPException) as excinfo:
         storage.load_ocr_text("../etc/passwd")
