@@ -1,6 +1,6 @@
 """Unit tests for text processing utilities."""
 
-from services.text import TextProcessor
+from services.processing import TextProcessor
 
 
 def test_split_into_sentences_removes_story_numbers_and_escapes():

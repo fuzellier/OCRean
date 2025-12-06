@@ -1,15 +1,12 @@
 """Service exports for the OCRean backend."""
 
-from .files import LocalFileStorage
-from .ocr import OCRProcessor
-from .s3_storage import S3FileStorage
-from .storage import FileStorage, create_storage
-from .text import TextProcessor
+from .processing import OCRProcessor, TextProcessor
+from .storage import FileStorage, LocalFileStorage, S3FileStorage, create_storage
 
 __all__ = [
+    "FileStorage",
     "LocalFileStorage",
     "S3FileStorage",
-    "FileStorage",
     "create_storage",
     "OCRProcessor",
     "TextProcessor",

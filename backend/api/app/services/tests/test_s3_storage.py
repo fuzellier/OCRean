@@ -6,7 +6,7 @@ import pytest
 from botocore.exceptions import ClientError
 from fastapi import HTTPException
 
-from services.s3_storage import S3FileStorage
+from services.storage import S3FileStorage
 
 
 @pytest.fixture
