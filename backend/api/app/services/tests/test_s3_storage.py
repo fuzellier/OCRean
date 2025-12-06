@@ -12,7 +12,7 @@ from services.storage import S3FileStorage
 @pytest.fixture
 def mock_s3_client():
     """Create a mock S3 client."""
-    with patch("services.s3_storage.boto3.client") as mock_boto:
+    with patch("services.storage.s3.boto3.client") as mock_boto:
         mock_client = MagicMock()
         mock_boto.return_value = mock_client
         # Mock head_bucket to succeed by default
