@@ -1,4 +1,4 @@
-"""Storage backend abstraction and factory."""
+"""Storage backend protocol definition."""
 
 from __future__ import annotations
 
@@ -43,32 +43,3 @@ class FileStorage(Protocol):
     def load_sentences(self, document_id: str) -> dict[str, Any]:
         """Load stored sentence data if available."""
         ...
-
-
-def create_storage() -> FileStorage:
-    """Factory function to create the appropriate storage backend.
-
-    Returns:
-        FileStorage instance based on configuration.
-
-    Raises:
-        ValueError: If S3 backend is selected but bucket name is missing.
-    """
-    from pathlib import Path
-
-    from ..config import StorageBackend, settings
-    from .files import LocalFileStorage
-    from .s3_storage import S3FileStorage
-
-    if settings.storage_backend == StorageBackend.S3:
-        if not settings.s3_bucket_name:
-            raise ValueError("S3 bucket name is required when using S3 storage backend")
-
-        return S3FileStorage(
-            bucket_name=settings.s3_bucket_name,
-            region=settings.s3_region,
-            aws_profile=settings.aws_profile,
-        )
-
-    data_dir = Path(settings.local_data_dir).resolve()
-    return LocalFileStorage(data_dir)
